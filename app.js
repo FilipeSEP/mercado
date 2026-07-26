@@ -3,7 +3,7 @@
 // A mesma lista fica salva na nuvem e sincroniza entre celulares.
 // =========================================================
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   window.SUPABASE_CONFIG.url,
   window.SUPABASE_CONFIG.anonKey
 );
@@ -36,7 +36,7 @@ const clearCartBtn = document.getElementById('clear-cart-btn');
 // =========================================================
 
 async function checkSession() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showApp();
   } else {
@@ -62,7 +62,7 @@ loginForm.addEventListener('submit', async (e) => {
   loginBtn.disabled = true;
   loginBtn.textContent = 'Entrando...';
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email: loginEmail.value.trim(),
     password: loginPassword.value
   });
@@ -80,7 +80,7 @@ loginForm.addEventListener('submit', async (e) => {
 });
 
 logoutBtn.addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   showLogin();
 });
 
@@ -89,7 +89,7 @@ logoutBtn.addEventListener('click', async () => {
 // =========================================================
 
 async function loadItems() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('items')
     .select('*')
     .order('created_at', { ascending: true });
@@ -105,7 +105,7 @@ async function loadItems() {
 
 // Atualiza a tela sempre que outro celular alterar a lista
 function subscribeRealtime() {
-  supabase
+  supabaseClient
     .channel('items-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
       loadItems();
@@ -160,7 +160,7 @@ async function toggleCheck(id, currentChecked) {
   items = items.map(item => item.id === id ? { ...item, checked: !currentChecked } : item);
   renderLists();
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('items')
     .update({ checked: !currentChecked })
     .eq('id', id);
@@ -178,7 +178,7 @@ clearCartBtn.addEventListener('click', async () => {
   items = items.map(item => ({ ...item, checked: false }));
   renderLists();
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('items')
     .update({ checked: false })
     .in('id', checkedIds);
@@ -195,7 +195,7 @@ addBtn.addEventListener('click', async () => {
 
   itemInput.value = '';
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('items')
     .insert({ name, checked: false });
 
@@ -224,7 +224,7 @@ finishBuyBtn.addEventListener('click', async () => {
 
   const itensComprados = items.filter(item => item.checked).map(i => i.name);
 
-  const { error: purchaseError } = await supabase
+  const { error: purchaseError } = await supabaseClient
     .from('purchases')
     .insert({ total: totalValue, items: itensComprados });
 
@@ -237,7 +237,7 @@ finishBuyBtn.addEventListener('click', async () => {
   alert(`Compra de R$ ${totalValue.toFixed(2)} salva com sucesso!`);
 
   const checkedIds = items.filter(i => i.checked).map(i => i.id);
-  await supabase.from('items').update({ checked: false }).in('id', checkedIds);
+  await supabaseClient.from('items').update({ checked: false }).in('id', checkedIds);
 
   totalAmountInput.value = '';
   loadItems();
