@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista do Mercado</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista do Mercado</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<section id="login-screen" class="login-screen">
+  <div class="login-card">
+    <h1>🛒 Lista do Mercado</h1>
+    <p class="login-subtitle">Entre com a conta da família</p>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="E-mail" required autocomplete="username">
+      <input type="password" id="login-password" placeholder="Senha" required autocomplete="current-password">
+      <button type="submit" class="btn-primary" id="login-btn">Entrar</button>
+      <p id="login-error" class="login-error"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== APP (só aparece logado) ===================== -->
+<div id="app-root" class="hidden">
 
   <!-- Header Fixo -->
   <header class="app-header">
     <h1>🛒 Lista do Mercado</h1>
-    <span class="family-badge">Família</span>
+    <div class="header-actions">
+      <span class="family-badge">Família</span>
+      <button id="logout-btn" class="btn-logout" title="Sair">Sair</button>
+    </div>
   </header>
 
   <!-- Input para Adicionar Item Extra -->
@@ -43,6 +63,10 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
