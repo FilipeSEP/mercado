@@ -1,104 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
 :root {
-  --primary: #2e7d32;         /* Verde principal */
-  --primary-hover: #1b5e20;
-  --bg-color: #f0f2f5;        /* Cinza claro para dar contraste */
-  --card-bg: #ffffff;         /* Branco puro para os cards */
-  --text-main: #1c1e21;       /* Texto escuro bem nítido */
-  --text-muted: #65676b;      /* Texto secundário */
-  --border-radius: 12px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Papel / superfícies */
+  --canvas: #DAD3C0;        /* balcão / mesa - fundo por trás do "recibo" */
+  --paper: #F4F0E4;         /* papel do recibo */
+  --paper-line: #E8E1CE;    /* faixa levemente mais escura pro carrinho */
+
+  /* Tinta */
+  --ink: #262420;
+  --ink-muted: #8C8371;
+  --ink-faint: rgba(38, 36, 32, 0.14);
+
+  /* Cores de ação */
+  --green: #2F6B4F;
+  --green-dark: #204E3A;
+  --stamp-red: #B8402F;
+  --stamp-red-dark: #8f3226;
+
+  --radius: 8px;
+  --shadow: 0 3px 14px rgba(38, 36, 32, 0.12);
+
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --strip-width: 480px;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  padding-bottom: 150px; /* Espaço para o rodapé fixo */
+  background: var(--canvas);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(38, 36, 32, 0.02) 0px,
+    rgba(38, 36, 32, 0.02) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+  color: var(--ink);
+  font-family: var(--font-body);
+  padding-bottom: 170px; /* espaço para o rodapé fixo */
+  min-height: 100vh;
 }
 
 .hidden {
   display: none !important;
 }
 
-/* Tela de Login */
+button, input {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   Efeito de borda rasgada (perfuração de recibo)
+   ========================================================= */
+.torn-bottom, .torn-top {
+  position: relative;
+}
+
+.torn-bottom::after,
+.torn-top::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-image:
+    linear-gradient(-45deg, var(--canvas) 6px, transparent 0),
+    linear-gradient(45deg, var(--canvas) 6px, transparent 0);
+  background-size: 12px 12px;
+  background-repeat: repeat-x;
+}
+
+.torn-bottom::after {
+  bottom: -9px;
+  background-position: left bottom;
+}
+
+.torn-top::before {
+  top: -9px;
+  background-position: left top;
+  transform: scaleY(-1);
+}
+
+/* =========================================================
+   Tela de Login (o "recibo" de acesso)
+   ========================================================= */
 .login-screen {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
 }
 
 .login-card {
-  background: var(--card-bg);
-  padding: 32px 28px;
-  border-radius: var(--border-radius);
+  background: var(--paper);
+  padding: 34px 28px 30px;
   box-shadow: var(--shadow);
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
   text-align: center;
 }
 
 .login-card h1 {
-  font-size: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
   margin-bottom: 6px;
 }
 
 .login-subtitle {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 20px;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--ink-faint);
 }
 
 #login-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-top: 18px;
 }
 
 #login-form input {
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: var(--border-radius);
+  padding: 13px 14px;
+  border: 1px solid var(--ink-faint);
+  background: var(--paper-line);
+  border-radius: 4px;
   font-size: 1rem;
   outline: none;
+  color: var(--ink);
+}
+
+#login-form input::placeholder {
+  color: var(--ink-muted);
 }
 
 #login-form input:focus {
-  border-color: var(--primary);
+  border-color: var(--green);
+  background: var(--paper);
 }
 
 #login-form .btn-primary {
-  padding: 12px;
-  margin-top: 4px;
+  padding: 13px;
+  margin-top: 6px;
 }
 
 .login-error {
-  color: #c62828;
-  font-size: 0.85rem;
+  color: var(--stamp-red);
+  font-size: 0.82rem;
   min-height: 18px;
+  font-weight: 500;
 }
 
-/* Header Fixo */
+/* =========================================================
+   Cabeçalho (masthead do recibo)
+   ========================================================= */
 .app-header {
-  background: var(--primary);
-  color: white;
-  padding: 16px 20px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 20px 22px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  max-width: var(--strip-width);
+  margin: 0 auto;
 }
 
 .app-header h1 {
-  font-size: 1.3rem;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .header-actions {
@@ -108,82 +202,118 @@ body {
 }
 
 .family-badge {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 10px;
+  background: transparent;
+  border: 1.5px solid var(--green);
+  color: var(--green-dark);
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .btn-logout {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: white;
-  padding: 5px 12px;
+  background: transparent;
+  border: 1.5px solid var(--stamp-red);
+  color: var(--stamp-red);
+  padding: 4px 11px;
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
 .btn-logout:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--stamp-red);
+  color: var(--paper);
 }
 
-/* Área de Adicionar Item */
+/* =========================================================
+   Área de Adicionar Item
+   ========================================================= */
 .quick-add {
   display: flex;
-  gap: 10px;
-  padding: 16px;
-  background: var(--card-bg);
-  box-shadow: var(--shadow);
-  margin-bottom: 8px;
+  gap: 8px;
+  padding: 14px 22px 20px;
+  background: var(--paper);
+  max-width: var(--strip-width);
+  margin: 0 auto;
 }
 
 .quick-add input {
   flex: 1;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: var(--border-radius);
+  padding: 12px 14px;
+  border: 1px solid var(--ink-faint);
+  background: var(--paper-line);
+  border-radius: 4px;
   font-size: 1rem;
   outline: none;
+  color: var(--ink);
+}
+
+.quick-add input::placeholder {
+  color: var(--ink-muted);
 }
 
 .quick-add input:focus {
-  border-color: var(--primary);
+  border-color: var(--green);
+  background: var(--paper);
+}
+
+#item-qty-input {
+  width: 58px;
+  flex: none;
+  text-align: center;
+  font-family: var(--font-num);
 }
 
 .quick-add button {
-  background: var(--text-main);
-  color: white;
+  background: var(--ink);
+  color: var(--paper);
   border: none;
   padding: 0 18px;
-  border-radius: var(--border-radius);
-  font-size: 0.95rem;
-  font-weight: bold;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-/* Conteúdo / Listas */
+.quick-add button:hover {
+  background: var(--green-dark);
+}
+
+/* =========================================================
+   Conteúdo / Listas (o corpo do recibo)
+   ========================================================= */
 .list-container {
-  padding: 16px;
-  max-width: 600px;
+  background: var(--paper);
+  padding: 4px 22px 20px;
+  max-width: var(--strip-width);
   margin: 0 auto;
 }
 
 .list-container h2 {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin: 16px 0 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  margin: 20px 0 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin: 24px 0 10px;
+  align-items: baseline;
+  margin: 26px 0 4px;
 }
 
 .section-header h2 {
@@ -192,89 +322,146 @@ body {
 
 /* Botão Esvaziar Carrinho */
 .btn-text {
-  background: #ffebee;
+  background: none;
   border: none;
-  color: #c62828;
-  font-size: 0.8rem;
-  font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 8px;
+  color: var(--stamp-red);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
+  padding: 4px 0;
 }
 
 .item-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-/* Cards dos Produtos (Toque fácil) */
+/* Linhas de item, no estilo "linha de recibo" */
 .item-card {
-  background: var(--card-bg);
-  padding: 16px;
-  border-radius: var(--border-radius);
+  background: transparent;
+  padding: 13px 2px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: var(--shadow);
+  gap: 14px;
+  border-bottom: 1px dashed var(--ink-faint);
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition: background-color 0.12s ease;
+  position: relative;
+}
+
+.item-list .item-card:last-child {
+  border-bottom: none;
 }
 
 .item-card:active {
-  transform: scale(0.98);
+  background-color: var(--paper-line);
 }
 
-/* Checkbox Grande */
 .item-card input[type="checkbox"] {
-  width: 26px;
-  height: 26px;
-  accent-color: var(--primary);
+  width: 22px;
+  height: 22px;
+  flex: none;
+  accent-color: var(--green);
   cursor: pointer;
 }
 
 .item-card .name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-main);
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
 }
 
-/* Estilo para itens já pegos */
+.item-card .qty,
+.item-card .price {
+  font-family: var(--font-num);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  flex: none;
+}
+
+.item-card .price {
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+/* Itens já no carrinho: recebem o "carimbo" */
+.checked-mode {
+  background: var(--paper-line);
+  margin: 0 -22px;
+  padding: 4px 22px;
+}
+
 .checked-mode .item-card {
-  background: #e4e6eb;
-  box-shadow: none;
-  opacity: 0.7;
+  border-bottom-color: rgba(38, 36, 32, 0.1);
 }
 
 .checked-mode .name {
-  text-decoration: line-through;
-  color: var(--text-muted);
+  color: var(--ink-muted);
 }
 
-/* Rodapé Fixo (Digitar Valor Total) */
+.checked-mode .item-card::after {
+  content: "OK";
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-9deg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--stamp-red);
+  border: 2px solid var(--stamp-red);
+  border-radius: 3px;
+  padding: 0px 6px;
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Rodapé Fixo (fecha o recibo)
+   ========================================================= */
 .app-footer {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--card-bg);
-  padding: 16px 20px;
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--strip-width);
+  background: var(--paper);
+  padding: 20px 22px 22px;
+  box-shadow: 0 -6px 20px rgba(38, 36, 32, 0.14);
   z-index: 10;
 }
 
 .finish-section {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
+}
+
+.estimated-total {
+  font-family: var(--font-num);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin: 0 0 10px;
 }
 
 .finish-section label {
   display: block;
-  font-size: 0.9rem;
-  font-weight: bold;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: var(--text-main);
+  color: var(--ink);
 }
 
 .input-group {
@@ -285,24 +472,30 @@ body {
 .input-group input {
   flex: 1;
   padding: 12px 14px;
-  border: 2px solid var(--primary);
-  border-radius: var(--border-radius);
+  border: 2px solid var(--green);
+  border-radius: 4px;
+  background: var(--paper-line);
+  font-family: var(--font-num);
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 700;
+  color: var(--ink);
   outline: none;
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: white;
+  background: var(--green);
+  color: var(--paper);
   border: none;
   padding: 0 20px;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--green-dark);
 }

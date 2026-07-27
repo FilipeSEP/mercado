@@ -27,9 +27,16 @@ const remainingCountEl = document.getElementById('remaining-count');
 const checkedCountEl = document.getElementById('checked-count');
 const addBtn = document.getElementById('add-btn');
 const itemInput = document.getElementById('item-input');
+const itemQtyInput = document.getElementById('item-qty-input');
 const finishBuyBtn = document.getElementById('finish-buy-btn');
 const totalAmountInput = document.getElementById('total-amount');
 const clearCartBtn = document.getElementById('clear-cart-btn');
+const estimatedTotalEl = document.getElementById('estimated-total');
+
+// Fica true assim que o usuário digita algo manualmente no campo de total,
+// pra pararmos de sobrescrever o valor dele com o cálculo automático.
+let totalEditedManually = false;
+totalAmountInput.addEventListener('input', () => { totalEditedManually = true; });
 
 // =========================================================
 // AUTENTICAÇÃO
@@ -127,11 +134,19 @@ function renderLists() {
   items.forEach(item => {
     const li = document.createElement('li');
     li.className = 'item-card';
-    li.onclick = () => toggleCheck(item.id, item.checked);
+    li.onclick = () => toggleCheck(item);
+
+    const qty = Number(item.quantity) || 1;
+    const qtyLabel = qty !== 1 ? `<span class="qty">x${qty}</span>` : '';
+    const priceLabel = (item.checked && item.unit_price != null)
+      ? `<span class="price">R$ ${(item.unit_price * qty).toFixed(2)}</span>`
+      : '';
 
     li.innerHTML = `
       <input type="checkbox" ${item.checked ? 'checked' : ''}>
       <span class="name">${item.name}</span>
+      ${qtyLabel}
+      ${priceLabel}
     `;
 
     if (item.checked) {
@@ -149,21 +164,59 @@ function renderLists() {
   if (clearCartBtn) {
     clearCartBtn.style.display = checkedCount > 0 ? 'block' : 'none';
   }
+
+  updateEstimatedTotal();
+}
+
+function updateEstimatedTotal() {
+  const total = items
+    .filter(i => i.checked && i.unit_price != null)
+    .reduce((sum, i) => sum + i.unit_price * (Number(i.quantity) || 1), 0);
+
+  const itemsSemPreco = items.some(i => i.checked && i.unit_price == null);
+
+  if (total > 0) {
+    estimatedTotalEl.textContent = `Estimado pelos preços: R$ ${total.toFixed(2)}`
+      + (itemsSemPreco ? ' (alguns itens sem preço informado)' : '');
+  } else {
+    estimatedTotalEl.textContent = '';
+  }
+
+  // Preenche o campo de total automaticamente, a não ser que a pessoa já
+  // tenha editado esse campo na mão nessa sessão.
+  if (!totalEditedManually && total > 0) {
+    totalAmountInput.value = total.toFixed(2);
+  }
 }
 
 // =========================================================
 // AÇÕES (agora gravando direto no banco)
 // =========================================================
 
-async function toggleCheck(id, currentChecked) {
+async function toggleCheck(item) {
+  const newChecked = !item.checked;
+  let unitPrice = item.unit_price;
+
+  if (newChecked) {
+    // Só pergunta o preço quando o item está sendo marcado como comprado
+    const resposta = prompt(
+      `Preço unitário de "${item.name}" (R$):`,
+      item.unit_price != null ? item.unit_price : ''
+    );
+    if (resposta === null) return; // cancelou, não marca o item
+
+    const parsed = parseFloat(resposta.replace(',', '.'));
+    unitPrice = isNaN(parsed) ? null : parsed;
+  }
+
   // Atualiza a tela na hora (otimista) e depois confirma no banco
-  items = items.map(item => item.id === id ? { ...item, checked: !currentChecked } : item);
+  items = items.map(i => i.id === item.id ? { ...i, checked: newChecked, unit_price: unitPrice } : i);
   renderLists();
 
   const { error } = await supabaseClient
     .from('items')
-    .update({ checked: !currentChecked })
-    .eq('id', id);
+    .update({ checked: newChecked, unit_price: unitPrice })
+    .eq('id', item.id);
 
   if (error) {
     console.error('Erro ao atualizar item:', error);
@@ -193,11 +246,15 @@ addBtn.addEventListener('click', async () => {
   const name = itemInput.value.trim();
   if (!name) return;
 
+  const qty = parseFloat(itemQtyInput.value);
+  const quantity = isNaN(qty) || qty <= 0 ? 1 : qty;
+
   itemInput.value = '';
+  itemQtyInput.value = 1;
 
   const { error } = await supabaseClient
     .from('items')
-    .insert({ name, checked: false });
+    .insert({ name, checked: false, quantity });
 
   if (error) {
     console.error('Erro ao adicionar item:', error);
@@ -222,7 +279,11 @@ finishBuyBtn.addEventListener('click', async () => {
     return;
   }
 
-  const itensComprados = items.filter(item => item.checked).map(i => i.name);
+  const itensComprados = items.filter(item => item.checked).map(i => ({
+    name: i.name,
+    quantity: Number(i.quantity) || 1,
+    unit_price: i.unit_price
+  }));
 
   const { error: purchaseError } = await supabaseClient
     .from('purchases')
@@ -237,9 +298,10 @@ finishBuyBtn.addEventListener('click', async () => {
   alert(`Compra de R$ ${totalValue.toFixed(2)} salva com sucesso!`);
 
   const checkedIds = items.filter(i => i.checked).map(i => i.id);
-  await supabaseClient.from('items').update({ checked: false }).in('id', checkedIds);
+  await supabaseClient.from('items').update({ checked: false, unit_price: null }).in('id', checkedIds);
 
   totalAmountInput.value = '';
+  totalEditedManually = false;
   loadItems();
 });
 

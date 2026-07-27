@@ -10,6 +10,8 @@ create table if not exists items (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   checked boolean not null default false,
+  quantity numeric(10,2) not null default 1,
+  unit_price numeric(10,2),
   created_at timestamptz not null default now()
 );
 

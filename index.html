@@ -10,7 +10,7 @@
 
 <!-- ===================== TELA DE LOGIN ===================== -->
 <section id="login-screen" class="login-screen">
-  <div class="login-card">
+  <div class="login-card torn-top torn-bottom">
     <h1>🛒 Lista do Mercado</h1>
     <p class="login-subtitle">Entre com a conta da família</p>
     <form id="login-form">
@@ -26,7 +26,7 @@
 <div id="app-root" class="hidden">
 
   <!-- Header Fixo -->
-  <header class="app-header">
+  <header class="app-header torn-bottom">
     <h1>🛒 Lista do Mercado</h1>
     <div class="header-actions">
       <span class="family-badge">Família</span>
@@ -37,6 +37,7 @@
   <!-- Input para Adicionar Item Extra -->
   <section class="quick-add">
     <input type="text" id="item-input" placeholder="Adicionar algo que faltou...">
+    <input type="number" id="item-qty-input" min="0.01" step="0.01" value="1" title="Quantidade">
     <button id="add-btn">Adicionar</button>
   </section>
 
@@ -53,8 +54,9 @@
   </main>
 
   <!-- Rodapé Fixo para Inserir Valor Total -->
-  <footer class="app-footer">
+  <footer class="app-footer torn-top">
     <div class="finish-section">
+      <p id="estimated-total" class="estimated-total"></p>
       <label for="total-amount">Gasto Total da Compra (R$):</label>
       <div class="input-group">
         <input type="number" id="total-amount" placeholder="Ex: 250.00" step="0.01">
