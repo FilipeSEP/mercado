@@ -6,3 +6,5 @@
 
 alter table items add column if not exists quantity numeric(10,2) not null default 1;
 alter table items add column if not exists unit_price numeric(10,2);
+
+alter table items add column if not exists unit text not null default 'un';

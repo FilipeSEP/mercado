@@ -28,6 +28,7 @@ const checkedCountEl = document.getElementById('checked-count');
 const addBtn = document.getElementById('add-btn');
 const itemInput = document.getElementById('item-input');
 const itemQtyInput = document.getElementById('item-qty-input');
+const itemUnitInput = document.getElementById('item-unit-input');
 const finishBuyBtn = document.getElementById('finish-buy-btn');
 const totalAmountInput = document.getElementById('total-amount');
 const clearCartBtn = document.getElementById('clear-cart-btn');
@@ -137,7 +138,10 @@ function renderLists() {
     li.onclick = () => toggleCheck(item);
 
     const qty = Number(item.quantity) || 1;
-    const qtyLabel = qty !== 1 ? `<span class="qty">x${qty}</span>` : '';
+    const unit = item.unit || 'un';
+    const qtyLabel = unit === 'kg'
+      ? `<span class="qty">${qty} kg</span>`
+      : (qty !== 1 ? `<span class="qty">x${qty}</span>` : '');
     const priceLabel = (item.checked && item.unit_price != null)
       ? `<span class="price">R$ ${(item.unit_price * qty).toFixed(2)}</span>`
       : '';
@@ -196,26 +200,41 @@ function updateEstimatedTotal() {
 async function toggleCheck(item) {
   const newChecked = !item.checked;
   let unitPrice = item.unit_price;
+  let quantity = item.quantity;
 
   if (newChecked) {
-    // Só pergunta o preço quando o item está sendo marcado como comprado
-    const resposta = prompt(
-      `Preço unitário de "${item.name}" (R$):`,
-      item.unit_price != null ? item.unit_price : ''
-    );
-    if (resposta === null) return; // cancelou, não marca o item
+    const unit = item.unit || 'un';
 
-    const parsed = parseFloat(resposta.replace(',', '.'));
-    unitPrice = isNaN(parsed) ? null : parsed;
+    // Pergunta a quantidade real (importante pro peso de legumes/frutas na balança)
+    const qtyLabel = unit === 'kg'
+      ? `Quantidade comprada de "${item.name}" (kg):`
+      : `Quantidade comprada de "${item.name}" (unidades):`;
+    const qtyResposta = prompt(qtyLabel, quantity != null ? quantity : 1);
+    if (qtyResposta === null) return; // cancelou, não marca o item
+
+    const parsedQty = parseFloat(qtyResposta.replace(',', '.'));
+    if (!isNaN(parsedQty) && parsedQty > 0) {
+      quantity = parsedQty;
+    }
+
+    // Pergunta o preço (por kg ou por unidade, dependendo do item)
+    const priceLabel = unit === 'kg'
+      ? `Preço por kg de "${item.name}" (R$):`
+      : `Preço unitário de "${item.name}" (R$):`;
+    const priceResposta = prompt(priceLabel, item.unit_price != null ? item.unit_price : '');
+    if (priceResposta === null) return; // cancelou, não marca o item
+
+    const parsedPrice = parseFloat(priceResposta.replace(',', '.'));
+    unitPrice = isNaN(parsedPrice) ? null : parsedPrice;
   }
 
   // Atualiza a tela na hora (otimista) e depois confirma no banco
-  items = items.map(i => i.id === item.id ? { ...i, checked: newChecked, unit_price: unitPrice } : i);
+  items = items.map(i => i.id === item.id ? { ...i, checked: newChecked, unit_price: unitPrice, quantity } : i);
   renderLists();
 
   const { error } = await supabaseClient
     .from('items')
-    .update({ checked: newChecked, unit_price: unitPrice })
+    .update({ checked: newChecked, unit_price: unitPrice, quantity })
     .eq('id', item.id);
 
   if (error) {
@@ -248,13 +267,15 @@ addBtn.addEventListener('click', async () => {
 
   const qty = parseFloat(itemQtyInput.value);
   const quantity = isNaN(qty) || qty <= 0 ? 1 : qty;
+  const unit = itemUnitInput.value === 'kg' ? 'kg' : 'un';
 
   itemInput.value = '';
   itemQtyInput.value = 1;
+  itemUnitInput.value = 'un';
 
   const { error } = await supabaseClient
     .from('items')
-    .insert({ name, checked: false, quantity });
+    .insert({ name, checked: false, quantity, unit });
 
   if (error) {
     console.error('Erro ao adicionar item:', error);
@@ -282,6 +303,7 @@ finishBuyBtn.addEventListener('click', async () => {
   const itensComprados = items.filter(item => item.checked).map(i => ({
     name: i.name,
     quantity: Number(i.quantity) || 1,
+    unit: i.unit || 'un',
     unit_price: i.unit_price
   }));
 

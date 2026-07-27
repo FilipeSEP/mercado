@@ -272,6 +272,24 @@ button, input {
   font-family: var(--font-num);
 }
 
+#item-unit-input {
+  width: 62px;
+  flex: none;
+  padding: 12px 6px;
+  border: 1px solid var(--ink-faint);
+  background: var(--paper-line);
+  border-radius: 4px;
+  font-family: var(--font-num);
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;
+}
+
+#item-unit-input:focus {
+  border-color: var(--green);
+  background: var(--paper);
+}
+
 .quick-add button {
   background: var(--ink);
   color: var(--paper);
