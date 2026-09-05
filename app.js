@@ -151,7 +151,14 @@ function renderLists() {
       <span class="name">${item.name}</span>
       ${qtyLabel}
       ${priceLabel}
+      <button class="delete-btn" title="Remover item">✕</button>
     `;
+
+    const deleteBtn = li.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // não deixa marcar/desmarcar o item ao clicar em remover
+      deleteItem(item);
+    });
 
     if (item.checked) {
       checkedListEl.appendChild(li);
@@ -240,6 +247,25 @@ async function toggleCheck(item) {
   if (error) {
     console.error('Erro ao atualizar item:', error);
     loadItems(); // desfaz a mudança visual se der erro
+  }
+}
+
+async function deleteItem(item) {
+  const confirmado = confirm(`Remover "${item.name}" da lista?`);
+  if (!confirmado) return;
+
+  // Remove na tela na hora (otimista) e depois confirma no banco
+  items = items.filter(i => i.id !== item.id);
+  renderLists();
+
+  const { error } = await supabaseClient
+    .from('items')
+    .delete()
+    .eq('id', item.id);
+
+  if (error) {
+    console.error('Erro ao remover item:', error);
+    loadItems(); // traz o item de volta se der erro
   }
 }
 
