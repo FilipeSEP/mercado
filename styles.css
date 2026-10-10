@@ -238,8 +238,8 @@ button, input {
    ========================================================= */
 .quick-add {
   display: flex;
-  gap: 8px;
-  padding: 14px 22px 20px;
+  gap: 6px;
+  padding: 14px 16px 20px;
   background: var(--paper);
   max-width: var(--strip-width);
   margin: 0 auto;
@@ -247,6 +247,7 @@ button, input {
 
 .quick-add input {
   flex: 1;
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--ink-faint);
   background: var(--paper-line);
@@ -266,14 +267,16 @@ button, input {
 }
 
 #item-qty-input {
-  width: 58px;
+  width: 54px;
+  padding-left: 6px;
+  padding-right: 6px;
   flex: none;
   text-align: center;
   font-family: var(--font-num);
 }
 
 #item-unit-input {
-  width: 62px;
+  width: 56px;
   flex: none;
   padding: 12px 6px;
   border: 1px solid var(--ink-faint);
@@ -294,7 +297,8 @@ button, input {
   background: var(--ink);
   color: var(--paper);
   border: none;
-  padding: 0 18px;
+  flex: none;
+  padding: 0 12px;
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -504,6 +508,7 @@ button, input {
 
 .input-group input {
   flex: 1;
+  min-width: 0;
   padding: 12px 14px;
   border: 2px solid var(--green);
   border-radius: 4px;
@@ -519,7 +524,8 @@ button, input {
   background: var(--green);
   color: var(--paper);
   border: none;
-  padding: 0 20px;
+  flex: none;
+  padding: 0 16px;
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -531,4 +537,30 @@ button, input {
 
 .btn-primary:hover {
   background: var(--green-dark);
+}
+
+/* =========================================================
+   Aviso de offline / sincronização
+   ========================================================= */
+.sync-status {
+  max-width: var(--strip-width);
+  margin: 0 auto;
+  background: var(--paper);
+  padding: 14px 22px 2px;
+  font-family: var(--font-num);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  border-left: 3px solid transparent;
+}
+
+.sync-status.offline {
+  color: var(--stamp-red-dark);
+  border-left-color: var(--stamp-red);
+  padding-left: 19px;
+}
+
+.sync-status.pending {
+  color: var(--green-dark);
+  border-left-color: var(--green);
+  padding-left: 19px;
 }
